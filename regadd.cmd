@@ -1,0 +1,1 @@
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Command Processor" /f /v "Autorun" /t REG_EXPAND_SZ /d "D:\labgen\aliases.cmd"

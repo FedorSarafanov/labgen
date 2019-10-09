@@ -7,9 +7,51 @@ import pyperclip
 import argparse
 import csv
 
-source='d:\\labgen\\LAB'
+dest=os.path.realpath(__file__).replace('lab.py','')
+source=os.path.join(dest,'LAB')
 run_dir=os.path.abspath(os.curdir) # may be os.getcwd()
-editor_path="c:\\Program Files\\Sublime Text 3\\sublime_text.exe"
+
+
+
+def get_reg_entries(hive, flag):
+    aReg = winreg.ConnectRegistry(None, hive)
+    aKey = winreg.OpenKey(aReg, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+                          0, winreg.KEY_READ | flag)
+
+    count_subkey = winreg.QueryInfoKey(aKey)[0]
+
+    software_list = []
+
+    for i in range(count_subkey):
+        software = {}
+        try:
+            asubkey_name = winreg.EnumKey(aKey, i)
+            asubkey = winreg.OpenKey(aKey, asubkey_name)
+            software['name'] = winreg.QueryValueEx(asubkey, "DisplayName")[0]
+            software['location'] = winreg.QueryValueEx(asubkey, "InstallLocation")[0]
+            software_list.append(software)
+        except EnvironmentError:
+            continue
+
+    return software_list
+
+if os.name=='nt':
+    import winreg,re
+    software_list = get_reg_entries(winreg.HKEY_LOCAL_MACHINE, winreg.KEY_WOW64_32KEY) +\
+                get_reg_entries(winreg.HKEY_LOCAL_MACHINE, winreg.KEY_WOW64_64KEY) +\
+                get_reg_entries(winreg.HKEY_CURRENT_USER, 0)
+
+    editor_path=''
+    for software in software_list:
+        if 'Sublime Text' in software['name']:
+            editor_path = r''+software['location']+'sublime_text.exe'
+elif os.name=='posix':
+    apps=os.listdir("/usr/bin")
+    for app in apps:
+        if 'subl' in app:
+            editor_path = app   
+
+# editor_path="c:\\Program Files\\Sublime Text 3\\sublime_text.exe"
 editor_command=editor_path+' {0}:{1}:{2}' # 0 filename, 1 str, 2 column
 
 def mkdir (dirr):
