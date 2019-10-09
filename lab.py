@@ -7,10 +7,10 @@ import pyperclip
 import argparse
 import csv
 
-# source=os.path.abspath(__file__)+'gr'
-# source=source.replace('/labgr','')+'/LAB'
-source='/home/lab/bin/LAB'
-run_dir=os.path.abspath(os.curdir)
+source='d:\\labgen\\LAB'
+run_dir=os.path.abspath(os.curdir) # may be os.getcwd()
+editor_path="c:\\Program Files\\Sublime Text 3\\sublime_text.exe"
+editor_command=editor_path+' {0}:{1}:{2}' # 0 filename, 1 str, 2 column
 
 def mkdir (dirr):
     if not os.path.exists(dirr):
@@ -26,8 +26,8 @@ def createParser ():
     # Создание лабораторной работы
     parser.add_argument ('-n', '--name', default='labwork')
     parser.add_argument ('-t','--title', default='Some title')
-    parser.add_argument ('-с','--number','--count', default='000')
-    parser.add_argument ('-g','--group', default='420')
+    parser.add_argument ('-с','--number','--count', default='1')
+    parser.add_argument ('-g','--group', default='440')
     parser.add_argument ('-a','--authors', default='Понур К.А., Сарафанов Ф.Г., Сидоров Д.А.')
 
     subparsers = parser.add_subparsers (dest='command')
@@ -39,20 +39,20 @@ def createParser ():
     img_parser.add_argument ('-l','--label')
     img_parser.add_argument ('-w','--width')
 
-    img_parser = subparsers.add_parser ('chem')
-    img_parser.add_argument ('subname', nargs='?')
-    img_parser.add_argument ('-n', '--name')
-    img_parser.add_argument ('-c','--caption')
-    img_parser.add_argument ('-l','--label')
-    img_parser.add_argument ('-w','--width')
+    chem_parser = subparsers.add_parser ('chem')
+    chem_parser.add_argument ('subname', nargs='?')
+    chem_parser.add_argument ('-n', '--name')
+    chem_parser.add_argument ('-c','--caption')
+    chem_parser.add_argument ('-l','--label')
+    chem_parser.add_argument ('-w','--width')
 
-    img_parser = subparsers.add_parser ('plot')
-    img_parser.add_argument ('subname', nargs='?')
-    img_parser.add_argument ('-n', '--name')
-    img_parser.add_argument ('-c','--caption')
-    img_parser.add_argument ('-l','--label')
-    img_parser.add_argument ('-w','--width')    
-    img_parser.add_argument ('-s','--style')    
+    plot_parser = subparsers.add_parser ('plot')
+    plot_parser.add_argument ('subname', nargs='?')
+    plot_parser.add_argument ('-n', '--name')
+    plot_parser.add_argument ('-c','--caption')
+    plot_parser.add_argument ('-l','--label')
+    plot_parser.add_argument ('-w','--width')    
+    plot_parser.add_argument ('-s','--style')    
 
     table_parser = subparsers.add_parser ('table')
     table_parser.add_argument ('subname', nargs='?')
@@ -88,12 +88,12 @@ def check(To):
         return True
 
 def readTable(name):
-    with open(run_dir+'/data/'+name+'.tsv','r', encoding="utf-8") as tsvin:
+    with open(os.path.join(run_dir,'data',name)+'.tsv','r', encoding="utf-8") as tsvin:
         tsv = csv.DictReader(tsvin, dialect='excel-tab')
         return ','.join(tsv.fieldnames)
 
 def genList(name):
-    with open(run_dir+'/data/'+name+'.tsv','r', encoding="utf-8") as tsvin:
+    with open(os.path.join(run_dir,'data',name)+'.tsv','r', encoding="utf-8") as tsvin:
         tsv = csv.DictReader(tsvin, dialect='excel-tab')
         # csvout = csv.writer(csvout)
         text='\t\tcolumns/F/.style={\n\t\t\tcolumn name={F},\n\t\t\t% precision=2\n\t\t},\n'
@@ -110,11 +110,11 @@ def createTable (namespace):
             tablename=namespace.name
         else:
             tablename=input("Имя таблицы (на английском, без расширения): ")
-    tabledirf=run_dir+'/table/'+tablename+'.tex'
-    if (os.path.exists(run_dir+'/data/'+tablename+'.tsv')) and (os.path.isfile(run_dir+'/data/'+tablename+'.tsv')):
+    tabledirf=os.path.join(run_dir,'table',tablename)+'.tex'
+    if (os.path.exists(os.path.join(run_dir,'table',tablename)+'.tsv')) and (os.path.isfile(run_dir+'/data/'+tablename+'.tsv')):
         if check(tabledirf):
             NAME=os.path.split(os.getcwd())[1]
-            with open(source+'/table/table.tex', "r") as f:
+            with open(os.path.join(source,'table','table.tex'), "r") as f:
                 index=f.read()
                 index=index.replace(r'NAME',NAME)
                 index=index.replace(r'HEADER',readTable(tablename))
@@ -124,7 +124,7 @@ def createTable (namespace):
             with open(tabledirf, "w+") as f:
                f.write(index)    
 
-            subprocess.check_output(['bash','-c', "subl3 "+run_dir+'/table/'+tablename+'.tex:6:9'])         
+            subprocess.check_output([editor_command.format(os.path.join(run_dir,'table',tablename+'.tex'),'6','9')])         
             pyperclip.copy('\input{table/'+tablename+'.tex}')
     else:
         print('Ошибка: нет исходных данных для таблицы')
@@ -132,9 +132,9 @@ def createTable (namespace):
         while not key in ['y','n','']:
             key=input("Скопировать файл шаблона? [y/n]: ")
         if (key=='y') or (key==''):
-            if savecopy(source+'/table/table.tex', tabledirf):
+            if savecopy(os.path.join(source,'table','table.tex'), tabledirf):
                 pyperclip.copy('\input{table/'+tablename+'.tex}')                
-                subprocess.check_output(['bash','-c', "subl3 "+run_dir+'/table/'+tablename+'.tex:6:9'])                     
+                subprocess.check_output([editor_command.format(os.path.join(run_dir,'table',tablename+'.tex'),'6','9')])         
         else:
             pass         
 
@@ -148,12 +148,13 @@ def createRis (namespace):
         else:
             imgname=input("Имя изображения (на английском): ")
 
-    savecopy(source+'/ris/img.tex', run_dir+'/ris/'+imgname+'.tex')
+    savecopy(os.path.join(source,'ris','img.tex'), os.path.join(run_dir,'ris',imgname+'.tex'))
 
-    imgname=input("Имя изображения (на английском): ")
-    subprocess.check_output(['bash','-c', "subl3 "+run_dir+'/ris/'+imgname+'.tex:28:9'])
+    # imgname=input("Имя изображения (на английском): ")
+    subprocess.check_output(editor_command.format(os.path.join(run_dir,'ris',imgname+'.tex'),'28','9'))         
 
-    with open(source+"/ris/ris_.tex", "r") as lines:
+
+    with open(os.path.join(source,'ris','ris_.tex'), "r") as lines:
         imgg=lines.read() # или сразу
         imgg=imgg.replace(r'{addr}','ris/'+imgname)
 
@@ -178,10 +179,10 @@ def createChem (namespace):
         else:
             imgname=input("Имя схемы (на английском): ")
 
-    savecopy(source+'/chem/chem.tex', run_dir+'/chem/'+imgname+'.tex')
-    subprocess.check_output(['bash','-c', "subl3 "+run_dir+'/chem/'+imgname+'.tex:6:9'])
+    savecopy(os.path.join(source,'chem','chem.tex'), os.path.join(run_dir,'chem',imgname+'.tex'))
+    subprocess.check_output([editor_command.format(os.path.join(run_dir,'chem',imgname+'.tex'),'6','9')])         
 
-    with open(source+"/chem/chem_.tex", "r") as lines:
+    with open(os.path.join(source,'chem','chem_.tex'), "r") as lines:
         imgg=lines.read() # или сразу
         imgg=imgg.replace(r'{addr}','chem/'+imgname)
         imgg=imgg.replace(r'{fig:','{chem:')
@@ -208,15 +209,15 @@ def createPlot (namespace):
             imgname=input("Имя графика (на английском): ")
 
     if namespace.style=='min':
-        savecopy(source+'/plot/plot-min.tex', run_dir+'/plot/'+imgname+'.tex')
+        savecopy(os.path.join(source,'plot','plot-min.tex'), os.path.join(run_dir,'plot',imgname+'.tex')) 
     elif namespace.style=='full':
-        savecopy(source+'/plot/plot-full.tex', run_dir+'/plot/'+imgname+'.tex')
+        savecopy(os.path.join(source,'plot','plot-full.tex'), os.path.join(run_dir,'plot',imgname+'.tex'))
     else:
-        savecopy(source+'/plot/plot-min.tex', run_dir+'/plot/'+imgname+'.tex')
+        savecopy(os.path.join(source,'plot','plot-min.tex'), os.path.join(run_dir,'plot',imgname+'.tex'))
 
-    subprocess.check_output(['bash','-c', "subl3 "+run_dir+'/plot/'+imgname+'.tex:6:9'])
+    subprocess.check_output([editor_command.format(os.path.join(run_dir,'plot',imgname+'.tex'),'6','9')])         
 
-    with open(source+"/plot/plot_.tex", "r") as lines:
+    with open(os.path.join(source,'plot','plot_.tex'), "r") as lines:
         imgg=lines.read() # или сразу
         imgg=imgg.replace(r'{addr}','plot/'+imgname)
         imgg=imgg.replace(r'{fig:','{plot:')
@@ -250,20 +251,20 @@ def createLab (namespace):
         if namespace.number=='':
             namespace.number=='000'
                                                                
-    directory=run_dir+'/'+namespace.name;
+    directory=os.path.join(run_dir,namespace.name)
     mkdir(directory)
 
-    mkdir(directory+'/data')
-    mkdir(directory+'/tables')
-
-    mkdir(directory+'/ris')
-    mkdir(directory+'/chem')
-    mkdir(directory+'/plot')
+    mkdir(os.path.join(directory,'data'))
+    mkdir(os.path.join(directory,'tables'))
+    mkdir(os.path.join(directory,'ris'))
+    mkdir(os.path.join(directory,'chem'))
+    mkdir(os.path.join(directory,'plot'))
     
-    mkdir(directory+'/text')
-    idx=directory+"/"+namespace.name+'.tex';
+    mkdir(os.path.join(directory,'text'))
 
-    with open(source+"/index.tex", "r") as lines:
+    idx=os.path.join(directory,namespace.name+'.tex')
+
+    with open(os.path.join(source,"index.tex"), "r") as lines:
         index=lines.read() # или сразу
 
     with open(idx, "w+") as f:
@@ -273,20 +274,19 @@ def createLab (namespace):
         index=index.replace(r'{authors}',namespace.authors)
         f.write(index)       
 
-    copyfile(source+'/text/diss.tex', directory+'/text/diss.tex')
-    copyfile(source+'/text/titlepage.tex', directory+'/text/titlepage.tex')
+    copyfile(os.path.join(source,'text',"diss.tex"), os.path.join(directory,'text','diss.tex'))
+    copyfile(os.path.join(source,'text',"titlepage.tex"), os.path.join(directory,'text','titlepage.tex'))
     
-    subprocess.check_output(['bash','-c', "subl3 "+idx+r":26:10"])    
+    subprocess.check_output(editor_command.format(idx,'26','10'))         
  
  
 if __name__ == '__main__':
     parser = createParser()
     namespace = parser.parse_args()
  
-    # print (namespace)
  
     if namespace.command in ['ris','chem','plot','table']:
-        Dir=run_dir+'/'+namespace.command
+        Dir=os.path.join(run_dir,namespace.command)
         if os.path.exists(Dir):
             if namespace.command=='ris':
                 createRis(namespace) 
