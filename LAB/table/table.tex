@@ -1,0 +1,33 @@
+%!TEX root=../NAME.tex
+\begin{table}[H]
+    \caption{CAPTION}
+    \label{tab:LABEL}
+
+    \pgfkeys{/pgf/number format/.cd,
+	fixed,  1000 sep={\,}}
+
+	\pgfplotstableset{
+		dec sep align,
+		col sep=tab,
+		fixed zerofill, 
+		precision=4,
+	    % create on use/omega/.style={
+	    %     create col/expr={
+	    %     \thisrow{Fr}*2*3.14
+	    %     }
+	    % },	 
+MODIFY
+		empty cells with={\textbf{--}},
+		every head row/.style={
+		before row={\toprule},
+		after row={
+			\midrule}
+			},
+		every last row/.style={after row=\bottomrule},
+		every row/.style={after row=\midrule}, 
+		columns={HEADER},		
+	}
+	\centering
+	\pgfplotstabletypeset[]{data/DATA.tsv}
+
+\end{table}

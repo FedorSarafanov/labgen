@@ -1,0 +1,60 @@
+\documentclass[tikz]{standalone}
+
+\usepackage[T2A]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{cmap,pgfplots,pgfplotstable}
+
+\begin{document}
+	\begin{tikzpicture}
+		\begin{axis}[
+			ylabel={YLAB},
+			xlabel={XLAB},
+			tick style={very thick},
+			% scale=0.5,
+			grid=both,
+			grid style={line width=1pt, draw=black!20},
+			major grid style={line width=.5pt,draw=black!90},
+			% minor y tick num=4,
+			% minor x tick num=4,   
+			% xmode=log,
+			% ymode=normal,
+			% xtick distance=1,
+			% ytick distance=1,
+			% ymax = 1.8,
+			xmin = 0,
+			ymin = 0,	
+			% xmax = 40,
+			% ticklabel style={font=\tiny,fill=white},	
+			% axis lines=middle, 	
+			% xlabel style={right, xshift=1em},
+			% ylabel style={above},	
+			% x label style={at={(axis description cs:0.5,-0.08)},anchor=north},
+			% y label style={at={(axis description cs:-0.08,.5)},rotate=90,anchor=south},
+			% legend style={
+			% at={(rel axis cs:0,1)},
+			% anchor=north west,draw=none,inner sep=0pt,fill=gray!10}
+		]
+
+		\addplot +[mark=*, mark size=1.5pt, only marks] 
+			plot [error bars/.cd, y dir = both, y explicit] 
+			table [
+				% create on use/COLUMNNAME/.style={
+				% 	create col/expr={
+				% 		\thisrow{x}*2
+				% 	}
+				% },
+				% create on use/omega/.style={
+				% 	create col/expr={
+				% 		\thisrow{Fr}*2*3.14
+				% 	}
+				% },
+				x=XDATA, 
+				y=YDATA, 
+				% y error=DP 
+			]{../data/TABLE};
+
+
+		% \addplot [samples=100, domain=70:3000*6.28, red] {1/x};
+		\end{axis}
+	\end{tikzpicture}	
+\end{document}

@@ -1,0 +1,321 @@
+% Тип документа
+\documentclass[a4paper,12pt]{extarticle}
+
+% Шрифты, кодировки, символьные таблицы, переносы
+\usepackage{cmap}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage[russian]{babel}
+
+% Это пакет -- хитрый пакет, он нужен но не нужен
+\usepackage[mode=buildnew]{standalone}
+
+\usepackage
+	{
+		% Дополнения Американского математического общества (AMS)
+		amssymb,
+		amsfonts,
+		amsmath,
+		amsthm,
+		% misccorr,
+		% 
+		% Графики и рисунки
+		wrapfig,
+		graphicx,
+		subcaption,
+		float,
+		tikz,
+		tikz-3dplot,
+		caption,
+		csvsimple,
+		color,
+		booktabs,
+		pgfplots,
+		pgfplotstable,
+		geometry,
+		% 
+		% Таблицы, списки
+		makecell,
+		multirow,
+		indentfirst,
+		%
+		% Интегралы и прочие обозначения
+		ulem,
+		esint,
+		esdiff,
+		% 
+		% Колонтитулы
+		fancyhdr,
+	}  
+
+
+% Обводка текста в TikZ
+\usepackage[outline]{contour}
+
+% Увеличенный межстрочный интервал, французские пробелы
+\linespread{1.3} 
+\frenchspacing 
+
+ 
+\usetikzlibrary
+	{
+		decorations.pathreplacing,
+		decorations.pathmorphing,
+		patterns,
+		calc,
+		scopes,
+		arrows,
+		fadings,
+		through,
+		shapes.misc,
+		arrows.meta,
+		3d,
+		quotes,
+		angles,
+		babel
+	}
+
+
+\tikzset{
+	force/.style=	{
+		>=latex,
+		draw=blue,
+		fill=blue,
+				 	}, 
+	%				 	
+	axis/.style=	{
+		densely dashed,
+		blue,
+		line width=1pt,
+		font=\small,
+					},
+	%
+	th/.style=	{
+		line width=1pt},
+	%
+	acceleration/.style={
+		>=open triangle 60,
+		draw=magenta,
+		fill=magenta,
+					},
+	%
+	inforce/.style=	{
+		force,
+		double equal sign distance=2pt,
+					},
+	%
+	interface/.style={
+		pattern = north east lines, 
+		draw    = none, 
+		pattern color=gray!60,
+					},
+	cross/.style=	{
+		cross out, 
+		draw=black, 
+		minimum size=2*(#1-\pgflinewidth), 
+		inner sep=0pt, outer sep=0pt,
+					},
+	%
+	cargo/.style=	{
+		rectangle, 
+		fill=black!70, 
+		inner sep=2.5mm,
+					},
+	%
+	caption/.style= {
+		midway,
+		fill=white!20, 
+		opacity=0.9
+					},
+	%
+	}
+
+\newenvironment{tikzpict}
+    {
+	    \begin{figure}[htbp]
+		\centering
+		\begin{tikzpicture}
+    }
+    { 
+		\end{tikzpicture}
+		% \caption{caption}
+		% \label{fig:label}
+		\end{figure}
+    }
+
+
+\newcommand{\vbLabel}[3]{\draw ($(#1,#2)+(0,5pt)$) -- ($(#1,#2)-(0,5pt)$) node[below]{#3}}
+\newcommand{\vaLabel}[3]{\draw ($(#1,#2)+(0,5pt)$) node[above]{#3} -- ($(#1,#2)-(0,5pt)$) }
+
+\newcommand{\hrLabel}[3]{\draw ($(#1,#2)+(5pt,0)$) -- ($(#1,#2)-(5pt,0)$) node[right, xshift=1em]{#3}}
+\newcommand{\hlLabel}[3]{\draw ($(#1,#2)+(5pt,0)$) node[left, xshift=-1em]{#3} -- ($(#1,#2)-(5pt,0)$) }
+
+
+
+\newcommand\zi{^{\,*}_i}
+\newcommand\sumn{\sum_{i=1}^{N}}
+
+\tikzset{
+	coordsys/.style={scale=1.8,x={(1.1cm,-0cm)},y={(0.5cm,1cm)}, z={(0cm,0.8cm)}},
+	coordsys/.style={scale=1.5,x={(0cm,0cm)},y={(1cm,0cm)}, z={(0cm,1cm)}}, 
+	coordsys/.style={scale=1.5,x={(1cm,0cm)},y={(0cm,1cm)}, z={(0cm,0cm)}}, 
+}
+
+\usepgfplotslibrary{units}
+
+
+% Draw line annotation
+% Input:
+%   #1 Line offset (optional)
+%   #2 Line angle
+%   #3 Line length
+%   #5 Line label
+% Example:
+%   \lineann[1]{30}{2}{$L_1$}
+
+\newcommand{\lineann}[4][0.5]{%
+    \begin{scope}[rotate=#2, blue,inner sep=2pt, ]
+        \draw[dashed, blue!40] (0,0) -- +(0,#1)
+            node [coordinate, near end] (a) {};
+        \draw[dashed, blue!40] (#3,0) -- +(0,#1)
+            node [coordinate, near end] (b) {};
+        \draw[|<->|] (a) -- node[fill=white, scale=0.8] {#4} (b);
+    \end{scope}
+}
+
+\newcommand{\lineannn}[4][0.5]{%
+    \begin{scope}[rotate=#2, blue,inner sep=2pt, ]
+        \draw[dashed, blue!40] (0,0) -- +(0,#1)
+            node [coordinate, near end] (a) {};
+        \draw[dashed, blue!40] (#3,0) -- +(0,#1)
+            node [coordinate, near end] (b) {};
+        % \draw[color=white, color=blue] (a) -- node[fill=white, scale=0.8] {#4} (b);
+        \draw[->|] (a)++(-0.3,0) -- (a);
+        \draw[->|] (b)++(0.3,0) coordinate (xx) -- (b);
+        \draw (xx) node[fill=white, scale=0.8, right] {#4};
+    \end{scope}
+}
+
+% Круговая стрелка относительно центра (дуга из центра)
+\tikzset{
+  pics/carc/.style args={#1:#2:#3}{
+    code={
+      \draw[pic actions] (#1:#3) arc(#1:#2:#3);
+    }
+  },
+  dash/.style={
+  	dash pattern=on 5mm off 5mm
+  }
+}
+
+% Среднее <#1>
+\newcommand{\mean}[1]{\langle#1\rangle}
+
+\pgfplotsset{
+    % most recent feature set of pgfplots
+    compat=newest,
+}
+
+% const прямым шрифтом
+\newcommand\ct[1]{\text{\rmfamily\upshape #1}}
+\newcommand*{\const}{\ct{const}}
+
+
+\usepackage[europeanresistors,americaninductors]{circuitikz}
+
+% Style to select only points from #1 to #2 (inclusive)
+\pgfplotsset{select/.style 2 args={
+    x filter/.code={
+        \ifnum\coordindex<#1\def\pgfmathresult{}\fi
+        \ifnum\coordindex>#2\def\pgfmathresult{}\fi
+    }
+}}
+
+
+\usepackage{array}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatletter
+\newif\if@gather@prefix 
+\preto\place@tag@gather{% 
+  \if@gather@prefix\iftagsleft@ 
+    \kern-\gdisplaywidth@ 
+    \rlap{\gather@prefix}% 
+    \kern\gdisplaywidth@ 
+  \fi\fi 
+} 
+\appto\place@tag@gather{% 
+  \if@gather@prefix\iftagsleft@\else 
+    \kern-\displaywidth 
+    \rlap{\gather@prefix}% 
+    \kern\displaywidth 
+  \fi\fi 
+  \global\@gather@prefixfalse 
+} 
+\preto\place@tag{% 
+  \if@gather@prefix\iftagsleft@ 
+    \kern-\gdisplaywidth@ 
+    \rlap{\gather@prefix}% 
+    \kern\displaywidth@ 
+  \fi\fi 
+} 
+\appto\place@tag{% 
+  \if@gather@prefix\iftagsleft@\else 
+    \kern-\displaywidth 
+    \rlap{\gather@prefix}% 
+    \kern\displaywidth 
+  \fi\fi 
+  \global\@gather@prefixfalse 
+} 
+\newcommand*{\beforetext}[1]{% 
+  \ifmeasuring@\else
+  \gdef\gather@prefix{#1}% 
+  \global\@gather@prefixtrue 
+  \fi
+} 
+\makeatother
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\geometry		
+	{
+		left			=	2cm,
+		right 			=	2cm,
+		top 			=	3cm,
+		bottom 			=	3cm,
+		bindingoffset	=	0cm
+	}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+	%применим колонтитул к стилю страницы
+\pagestyle{fancy} 
+	%очистим "шапку" страницы
+\fancyhead{} 
+	%слева сверху на четных и справа на нечетных
+\fancyhead[R]{\labauthors} 
+	%справа сверху на четных и слева на нечетных
+\fancyhead[L]{Отчёт по лабораторной работе №\labnumber} 
+	%очистим "подвал" страницы
+\fancyfoot{} 
+	% номер страницы в нижнем колинтуле в центре
+\fancyfoot[C]{\thepage} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand{\contentsname}{Оглавление}
+
+\usepackage{tocloft}
+% \renewcommand{\cftpartleader}{\cftdotfill{\cftdotsep}} % for parts
+% \renewcommand{\cftsectiondotsep}{\cftdotsep}% Chapters should use dots in ToC
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+%\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}} % for sections, if you really want! (It is default in report and book class (So you may not need it).
+% ---------
+% \newcommand{\cftchapaftersnum}{.}%
+% \usepackage{titlesec}
+% \titlelabel{\thetitle.\quad}
+\usepackage{secdot}
+\sectiondot{subsection}
